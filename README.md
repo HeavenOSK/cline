@@ -124,6 +124,8 @@ npm run build-local
 
 This will create a `.vsix` file that you can install in VSCode to verify the extension works as expected in a real environment.
 
+After building, you can install the generated .vsix file by opening the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`), selecting `Extensions: Install from VSIX...`, and choosing the generated file.
+
 </details>
 
 ## License
