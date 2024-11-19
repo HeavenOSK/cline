@@ -20,6 +20,7 @@ import { Cline } from "../Cline"
 import { openMention } from "../mentions"
 import { getNonce } from "./getNonce"
 import { getUri } from "./getUri"
+import { playSound, setSoundEnabled } from "../../utils/sound"
 
 /*
 https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/default/weather-webview/src/providers/WeatherViewProvider.ts
@@ -57,6 +58,7 @@ type GlobalStateKey =
 	| "azureApiVersion"
 	| "openRouterModelId"
 	| "openRouterModelInfo"
+	| "soundEnabled"
 
 export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
@@ -482,8 +484,18 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 
 						break
-					// Add more switch case statements here as more webview message commands
-					// are created within the webview context (i.e. inside media/main.js)
+					case "playSound":
+						if (message.audioType) {
+							const soundPath = path.join(this.context.extensionPath, "audio", `${message.audioType}.wav`)
+							playSound(soundPath)
+						}
+						break
+					case "soundEnabled":
+						const enabled = message.bool ?? true
+						await this.updateGlobalState("soundEnabled", enabled)
+						setSoundEnabled(enabled) // sound.tsから import
+						await this.postStateToWebview()
+						break
 				}
 			},
 			null,
@@ -781,8 +793,14 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async getStateToPostToWebview() {
-		const { apiConfiguration, lastShownAnnouncementId, customInstructions, alwaysAllowReadOnly, taskHistory } =
-			await this.getState()
+		const {
+			apiConfiguration,
+			lastShownAnnouncementId,
+			customInstructions,
+			alwaysAllowReadOnly,
+			taskHistory,
+			soundEnabled,
+		} = await this.getState()
 		return {
 			version: this.context.extension?.packageJSON?.version ?? "",
 			apiConfiguration,
@@ -790,6 +808,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			alwaysAllowReadOnly,
 			uriScheme: vscode.env.uriScheme,
 			clineMessages: this.cline?.clineMessages || [],
+			soundEnabled: soundEnabled ?? true,
 			taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),
 			shouldShowAnnouncement: lastShownAnnouncementId !== this.latestAnnouncementId,
 		}
@@ -876,6 +895,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			customInstructions,
 			alwaysAllowReadOnly,
 			taskHistory,
+			soundEnabled,
 		] = await Promise.all([
 			this.getGlobalState("apiProvider") as Promise<ApiProvider | undefined>,
 			this.getGlobalState("apiModelId") as Promise<string | undefined>,
@@ -905,6 +925,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getGlobalState("customInstructions") as Promise<string | undefined>,
 			this.getGlobalState("alwaysAllowReadOnly") as Promise<boolean | undefined>,
 			this.getGlobalState("taskHistory") as Promise<HistoryItem[] | undefined>,
+			this.getGlobalState("soundEnabled") as Promise<boolean | undefined>,
 		])
 
 		let apiProvider: ApiProvider
@@ -952,6 +973,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			customInstructions,
 			alwaysAllowReadOnly: alwaysAllowReadOnly ?? false,
 			taskHistory,
+			soundEnabled,
 		}
 	}
 
