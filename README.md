@@ -119,7 +119,7 @@ To contribute to the project, start by exploring [open issues](https://github.co
 To test the extension in a production-like environment, you can package it using:
 
 ```bash
-npm run build-local
+npx vsce package
 ```
 
 This will create a `.vsix` file that you can install in VSCode to verify the extension works as expected in a real environment.
