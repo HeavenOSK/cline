@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { useEvent } from "react-use"
-import { ExtensionMessage, ExtensionState } from "../../../src/shared/ExtensionMessage"
+import { ExtensionMessage, ExtensionState, PathSetting } from "../../../src/shared/ExtensionMessage"
 import {
 	ApiConfiguration,
 	ModelInfo,
@@ -23,6 +23,7 @@ interface ExtensionStateContextType extends ExtensionState {
 	setShowAnnouncement: (value: boolean) => void
 	setSoundEnabled: (value: boolean) => void
 	setCommandEnterToSend: (value: boolean) => void
+	setPathSettings: (value: PathSetting[]) => void
 }
 
 const ExtensionStateContext = createContext<ExtensionStateContextType | undefined>(undefined)
@@ -35,6 +36,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		shouldShowAnnouncement: false,
 		soundEnabled: true,
 		commandEnterToSend: false,
+		pathSettings: [],
 	})
 	const [didHydrateState, setDidHydrateState] = useState(false)
 	const [showWelcome, setShowWelcome] = useState(false)
@@ -121,6 +123,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		setShowAnnouncement: (value) => setState((prevState) => ({ ...prevState, shouldShowAnnouncement: value })),
 		setSoundEnabled: (value) => setState((prevState) => ({ ...prevState, soundEnabled: value })),
 		setCommandEnterToSend: (value) => setState((prevState) => ({ ...prevState, commandEnterToSend: value })),
+		setPathSettings: (value) => setState((prevState) => ({ ...prevState, pathSettings: value })),
 	}
 
 	return <ExtensionStateContext.Provider value={contextValue}>{children}</ExtensionStateContext.Provider>

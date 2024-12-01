@@ -3,6 +3,11 @@
 import { ApiConfiguration, ModelInfo } from "./api"
 import { HistoryItem } from "./HistoryItem"
 
+export interface PathSetting {
+  path: string
+  description: string
+}
+
 // webview will hold state
 export interface ExtensionMessage {
 	type:
@@ -39,6 +44,7 @@ export interface ExtensionState {
 	shouldShowAnnouncement: boolean
 	soundEnabled?: boolean
 	commandEnterToSend?: boolean
+	pathSettings?: PathSetting[]
 }
 
 export interface ClineMessage {

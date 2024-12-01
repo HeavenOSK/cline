@@ -4,6 +4,7 @@ import { useExtensionState } from "../../context/ExtensionStateContext"
 import { validateApiConfiguration, validateModelId } from "../../utils/validate"
 import { vscode } from "../../utils/vscode"
 import ApiOptions from "./ApiOptions"
+import { PathSettingsForm } from "./PathSettingsForm"
 
 const IS_DEV = false // FIXME: use flags when packaging
 
@@ -24,9 +25,12 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 		openRouterModels,
 		commandEnterToSend,
 		setCommandEnterToSend,
+		pathSettings,
+		setPathSettings,
 	} = useExtensionState()
 	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined)
 	const [modelIdErrorMessage, setModelIdErrorMessage] = useState<string | undefined>(undefined)
+
 	const handleSubmit = () => {
 		const apiValidationResult = validateApiConfiguration(apiConfiguration)
 		const modelIdValidationResult = validateModelId(apiConfiguration, openRouterModels)
@@ -39,6 +43,9 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 			vscode.postMessage({ type: "alwaysAllowReadOnly", bool: alwaysAllowReadOnly })
 			vscode.postMessage({ type: "soundEnabled", bool: soundEnabled })
 			vscode.postMessage({ type: "commandEnterToSend", bool: commandEnterToSend })
+			if (pathSettings) {
+				vscode.postMessage({ type: "pathSettings", pathSettings: pathSettings })
+			}
 			onDone()
 		}
 	}
@@ -47,18 +54,6 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 		setApiErrorMessage(undefined)
 		setModelIdErrorMessage(undefined)
 	}, [apiConfiguration])
-
-	// validate as soon as the component is mounted
-	/*
-	useEffect will use stale values of variables if they are not included in the dependency array. so trying to use useEffect with a dependency array of only one value for example will use any other variables' old values. In most cases you don't want this, and should opt to use react-use hooks.
-	
-	useEffect(() => {
-		// uses someVar and anotherVar
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [someVar])
-
-	If we only want to run code once on mount we can use react-use's useEffectOnce or useMount
-	*/
 
 	const handleResetState = () => {
 		vscode.postMessage({ type: "resetState" })
@@ -97,7 +92,20 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						modelIdErrorMessage={modelIdErrorMessage}
 					/>
 				</div>
-
+				<div style={{ marginBottom: 5 }}>
+					<PathSettingsForm
+						initialSettings={pathSettings}
+						onChange={setPathSettings}
+					/>
+					<p
+						style={{
+							fontSize: "12px",
+							marginTop: "5px",
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+						Configure paths and their descriptions that you want Cline to be aware of in advance. This helps Cline better understand important locations.
+					</p>
+				</div>
 				<div style={{ marginBottom: 5 }}>
 					<VSCodeTextArea
 						value={customInstructions ?? ""}
@@ -118,7 +126,6 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 						These instructions are added to the end of the system prompt sent with every request.
 					</p>
 				</div>
-
 				<div style={{ marginBottom: 5 }}>
 					<VSCodeCheckbox
 						checked={alwaysAllowReadOnly}
