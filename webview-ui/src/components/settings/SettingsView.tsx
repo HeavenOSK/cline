@@ -22,6 +22,8 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 		soundEnabled,
 		setSoundEnabled,
 		openRouterModels,
+		commandEnterToSend,
+		setCommandEnterToSend,
 	} = useExtensionState()
 	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined)
 	const [modelIdErrorMessage, setModelIdErrorMessage] = useState<string | undefined>(undefined)
@@ -36,6 +38,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 			vscode.postMessage({ type: "customInstructions", text: customInstructions })
 			vscode.postMessage({ type: "alwaysAllowReadOnly", bool: alwaysAllowReadOnly })
 			vscode.postMessage({ type: "soundEnabled", bool: soundEnabled })
+			vscode.postMessage({ type: "commandEnterToSend", bool: commandEnterToSend })
 			onDone()
 		}
 	}
@@ -143,6 +146,22 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 							color: "var(--vscode-descriptionForeground)",
 						}}>
 						When enabled, Cline will play sound effects for notifications and events.
+					</p>
+				</div>
+				<div style={{ marginBottom: 5 }}>
+					<VSCodeCheckbox
+						checked={commandEnterToSend}
+						onChange={(e: any) => setCommandEnterToSend(e.target.checked)}>
+						<span style={{ fontWeight: "500" }}>Use Command + Enter to send messages</span>
+					</VSCodeCheckbox>
+					<p
+						style={{
+							fontSize: "12px",
+							marginTop: "5px",
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+						When enabled, messages will be sent using Command + Enter. When disabled, messages will be sent
+						using Enter.
 					</p>
 				</div>
 				{IS_DEV && (

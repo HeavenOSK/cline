@@ -42,7 +42,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		},
 		ref,
 	) => {
-		const { filePaths } = useExtensionState()
+		const { filePaths, commandEnterToSend } = useExtensionState()
 		const [isTextAreaFocused, setIsTextAreaFocused] = useState(false)
 		const [thumbnailsHeight, setThumbnailsHeight] = useState(0)
 		const [textAreaBaseHeight, setTextAreaBaseHeight] = useState<number | undefined>(undefined)
@@ -200,6 +200,11 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 
 				const isComposing = event.nativeEvent?.isComposing ?? false
 				if (event.key === "Enter" && !event.shiftKey && !isComposing) {
+					if ((commandEnterToSend ?? false) && !event.metaKey) {
+						console.log('hello')
+						return
+					}
+					console.log('goodbye')
 					event.preventDefault()
 					onSend()
 				}
@@ -240,19 +245,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					}
 				}
 			},
-			[
-				onSend,
-				showContextMenu,
-				searchQuery,
-				selectedMenuIndex,
-				handleMentionSelect,
-				selectedType,
-				inputValue,
-				cursorPosition,
-				setInputValue,
-				justDeletedSpaceAfterMention,
-				queryItems,
-			],
+			[showContextMenu, selectedMenuIndex, searchQuery, selectedType, queryItems, handleMentionSelect, commandEnterToSend, onSend, inputValue, cursorPosition, justDeletedSpaceAfterMention, setInputValue],
 		)
 
 		useLayoutEffect(() => {

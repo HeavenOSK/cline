@@ -59,7 +59,7 @@ type GlobalStateKey =
 	| "openRouterModelId"
 	| "openRouterModelInfo"
 	| "soundEnabled"
-
+	| "commandEnterToSend"
 export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
 	uiMessages: "ui_messages.json",
@@ -493,12 +493,19 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							playSound(soundPath)
 						}
 						break
-					case "soundEnabled":
+					case "soundEnabled":{
 						const enabled = message.bool ?? true
 						await this.updateGlobalState("soundEnabled", enabled)
 						setSoundEnabled(enabled) // sound.tsから import
 						await this.postStateToWebview()
 						break
+					}
+					case "commandEnterToSend":{
+						const enabled = message.bool ?? false
+						await this.updateGlobalState("commandEnterToSend", enabled)
+						await this.postStateToWebview()
+						break
+					}
 				}
 			},
 			null,
@@ -803,6 +810,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			alwaysAllowReadOnly,
 			taskHistory,
 			soundEnabled,
+			commandEnterToSend,
 		} = await this.getState()
 		return {
 			version: this.context.extension?.packageJSON?.version ?? "",
@@ -812,6 +820,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			uriScheme: vscode.env.uriScheme,
 			clineMessages: this.cline?.clineMessages || [],
 			soundEnabled: soundEnabled ?? true,
+			commandEnterToSend: commandEnterToSend ?? false,
 			taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),
 			shouldShowAnnouncement: lastShownAnnouncementId !== this.latestAnnouncementId,
 		}
@@ -899,6 +908,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			alwaysAllowReadOnly,
 			taskHistory,
 			soundEnabled,
+			commandEnterToSend,
 		] = await Promise.all([
 			this.getGlobalState("apiProvider") as Promise<ApiProvider | undefined>,
 			this.getGlobalState("apiModelId") as Promise<string | undefined>,
@@ -929,6 +939,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getGlobalState("alwaysAllowReadOnly") as Promise<boolean | undefined>,
 			this.getGlobalState("taskHistory") as Promise<HistoryItem[] | undefined>,
 			this.getGlobalState("soundEnabled") as Promise<boolean | undefined>,
+			this.getGlobalState("commandEnterToSend") as Promise<boolean | undefined>,
 		])
 
 		let apiProvider: ApiProvider
@@ -977,6 +988,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			alwaysAllowReadOnly: alwaysAllowReadOnly ?? false,
 			taskHistory,
 			soundEnabled,
+			commandEnterToSend,
 		}
 	}
 

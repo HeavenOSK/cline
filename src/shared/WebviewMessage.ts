@@ -27,6 +27,7 @@ export interface WebviewMessage {
 		| "refreshOpenRouterModels"
 		| "playSound"
 		| "soundEnabled"
+		| "commandEnterToSend"
 	text?: string
 	askResponse?: ClineAskResponse
 	apiConfiguration?: ApiConfiguration
