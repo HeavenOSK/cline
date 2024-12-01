@@ -38,6 +38,7 @@ export interface ExtensionState {
 	taskHistory: HistoryItem[]
 	shouldShowAnnouncement: boolean
 	soundEnabled?: boolean
+	commandEnterToSend?: boolean
 }
 
 export interface ClineMessage {
